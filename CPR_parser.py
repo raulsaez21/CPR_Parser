@@ -17,7 +17,7 @@ def process_other_day(TACT_ID, SO6_filename, flights):
             found = True
             with open(SO6_filename, 'a') as SO6_file:
                 writer = csv.writer(SO6_file)
-                line_SO6 = build_SO6(flights[h])
+                line_SO6 = flights[h]
                 writer.writerow(line_SO6)
 
         if found and flights[h][1] != TACT_ID:
@@ -27,17 +27,6 @@ def process_other_day(TACT_ID, SO6_filename, flights):
     #if index_flight != -1:
 
     return
-
-
-# Building the line to be written in the SO6 output file
-def build_SO6(CPR_row):
-    # Segment Identifier, Origin of flight, Destination of flight, aircraft type, Time begin segment,
-    # Time end segment, FL begin segment, FL end segment, Status, Call sign, Date begin segment, Date end segment,
-    # Latitude begin segment, Longitude begin segment, Latitude end segment, Longitude end segment,
-    # Flight identifier, Sequence, Segment length, Segment parity/color
-    line_SO6_f = [CPR_row]
-
-    return line_SO6_f
 
 
 def read_index_file(filename):
@@ -82,7 +71,8 @@ def read_flights_comma(filename):
         try:
             for row in reader:
                 # for row in islice(reader, 0, 100000):
-                list_flights.append(row)
+                if row[1] != '':
+                    list_flights.append(row)
         except csv.Error as e:
             sys.exit('file %s, line %d: %s' % (filename, reader.line_num, e))
 
@@ -125,16 +115,14 @@ for i in range(0, n_flights):
         for sublist in D_after_flights:
             if sublist[1] == TACT_ID:
                 process_other_day(TACT_ID_old, SO6_filename, D_after_flights)
+                break
         D_after = True
     if TACT_ID != TACT_ID_old and not D_before:
-        for sublist in D_before_flights: #Maybe remove this sublist thing and go to the file directly (or compute the index?)
+        for sublist in D_before_flights:
             if sublist[1] == TACT_ID:
                 process_other_day(TACT_ID, SO6_filename, D_before_flights)
+                break
         D_before = True
-    # # Processing the day before if the TACT_ID is there
-    # if TACT_ID in D_before_flights: # Create a list with only the TACT_ID located in D-1
-    #     filename = '1.201607271001tacop104ARCHIVED_OPLOG_ALL_CPR'
-    #     process_other_day(filename, TACT_ID, SO6_filename, list1, D_before_flights)
 
     if D_before and D_after:
         print "Flight %s finished" % TACT_ID_old
@@ -145,55 +133,9 @@ for i in range(0, n_flights):
     # Write data of the CPR D (current day)
     with open(SO6_filename, 'a') as SO6_file:
         writer = csv.writer(SO6_file)
-        line_SO6 = build_SO6(D_flights[i])
+        line_SO6 = D_flights[i]
         writer.writerow(line_SO6)
 
     TACT_ID_old = TACT_ID
 
-    SO6_file.close()
-
-
-
-
-
-
-
-
-
-
-# for i in range(1, n_flights):
-#     with open(CPR_filename, 'rb') as CPR_file:
-#         reader = csv.reader(CPR_file, delimiter=';', lineterminator='\n')
-#         try:
-#             start = int(list2[i * 3 - 2]) - 1
-#             stop = int(list2[i * 3 - 1])
-#             TACT_ID = 0
-#
-#             for row in islice(reader, start, stop):
-#                 TACT_ID = row[1]
-#
-#                 # Write data of CPR D-1 (the day before)
-#                 if not D_before:
-#                     filename = '1.201607271001tacop104ARCHIVED_OPLOG_ALL_CPR'
-#                     process_other_day(filename, TACT_ID, SO6_filename, list1)
-#                     D_before = True
-#
-#                 # Write data of the CPR D (current day)
-#                 with open(SO6_filename, 'a') as SO6_file:
-#                     writer = csv.writer(SO6_file)
-#                     line_SO6 = build_SO6(row)
-#                     writer.writerow(line_SO6)
-#
-#                     # search_same_TACT_ID(TACT_ID)  #check if in the file D there is information with the same TACT_ID
-#
-#             # Process D + 1 and print flight finished
-#             filename = '1.201607291001tacop104ARCHIVED_OPLOG_ALL_CPR'
-#             process_other_day(filename, TACT_ID, SO6_filename, list3)
-#             D_before = False
-#             #print "Flight %s finished" % TACT_ID
-#
-#         except csv.Error as e:
-#             sys.exit('file %s, line %d: %s' % (CPR_filename, reader.line_num, e))
-#
-#     CPR_file.close()
-#     SO6_file.close()
+SO6_file.close()

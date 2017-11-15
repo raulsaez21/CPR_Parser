@@ -65,7 +65,6 @@ def filter_flights(list_flights_other_D, filename, D_TACT_ID):
     return filtered_flight_indexes
 
 
-
 def filter_flights_files(indexes, output_filename, flights):
 
     stop = len(indexes)
