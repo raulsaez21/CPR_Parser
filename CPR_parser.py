@@ -7,7 +7,6 @@ import gc
 
 
 # Functions definitions
-
 # Read flight data from the flight one day before or after
 def process_other_day(TACT_ID, SO6_filename, flights):
 
@@ -29,24 +28,6 @@ def process_other_day(TACT_ID, SO6_filename, flights):
     return
 
 
-def read_index_file(filename):
-    index_list = []
-
-    with open(filename, 'rb') as index_file:
-        reader = csv.reader(index_file, delimiter=',', lineterminator='\n')
-        try:
-            for row in reader:
-                index_list.append(row[0])
-                index_list.append(row[1])
-                index_list.append(row[2])
-
-        except csv.Error as e:
-            sys.exit('file %s, line %d: %s' % (CPR_filename, reader.line_num, e))
-
-    index_file.close()
-    return index_list
-
-
 def read_flights(filename):
     list_flights = []
 
@@ -63,7 +44,8 @@ def read_flights(filename):
     print 'Flight stored to list'
     return list_flights
 
-def read_flights_comma(filename):
+
+def read_flights(filename):
     list_flights = []
 
     with open(filename, 'rb') as flights_file:
@@ -86,14 +68,13 @@ def read_flights_comma(filename):
 # with the new start and ending indexes)!!!!!!!
 
 CPR_filename = 'Sorted_flight_previous_D.csv'
-D_before_flights = read_flights_comma(CPR_filename)
+D_before_flights = read_flights(CPR_filename)
 CPR_filename = 'Sorted_flight_D.csv'
-D_flights = read_flights_comma(CPR_filename)
+D_flights = read_flights(CPR_filename)
 CPR_filename = 'Sorted_flight_next_D.csv'
-D_after_flights = read_flights_comma(CPR_filename)
+D_after_flights = read_flights(CPR_filename)
 
 # Main code
-CPR_filename = '1.201607281001tacop104ARCHIVED_OPLOG_ALL_CPR'
 SO6_filename = 'CPR_D.csv'
 
 try:

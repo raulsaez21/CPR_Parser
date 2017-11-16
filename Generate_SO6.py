@@ -21,7 +21,7 @@ def compute_distance(lat, pre_lat, lon, pre_lon):
     return distance
 
 
-def build_SO6_line(CPR_line, CPR_previous_line, index):
+def build_SO6_line(CPR_line, CPR_previous_line, index, end):
     # Time and date
     time = re.sub("[^0-9]", "", CPR_line[2][-8:])
     previous_time = re.sub("[^0-9]", "", CPR_previous_line[2][-8:])
@@ -89,7 +89,13 @@ def build_SO6_line(CPR_line, CPR_previous_line, index):
     # We have to check the issue with the origin and destination airport if we are actually there or not
     # (actually we are never there, always 3000 ft above or something like that) ;;; how to identify last segment
     if index == 0:
+        #x = [x for x in airports if 'Hello' in x][0]
+
         SO6_line = ['%s_!%03d' % (CPR_line[9], index), CPR_line[9], CPR_line[10], Aircraft_Model, previous_time, time,
+                    CPR_previous_line[13], CPR_line[13], Status, CPR_line[8], previous_date, date, previous_lat,
+                    previous_lon, Lat, Lon, flight_id, str(index + 1), segment_length, '0']
+    elif end:
+        SO6_line = ['!%03d_%s' % (index, CPR_line[10]), CPR_line[9], CPR_line[10], Aircraft_Model, previous_time, time,
                     CPR_previous_line[13], CPR_line[13], Status, CPR_line[8], previous_date, date, previous_lat,
                     previous_lon, Lat, Lon, flight_id, str(index + 1), segment_length, '0']
     else:
@@ -116,6 +122,7 @@ def read_flights(filename):
 
 
 def write_SO6_flights(flights):
+    end= False
     TACT_ID_old = 1234567
     flight_index = 1
 
@@ -124,13 +131,20 @@ def write_SO6_flights(flights):
 
         if TACT_ID != TACT_ID_old:
             flight_index = 0
+            end = False
             print 'Flight %s converted' % TACT_ID
             TACT_ID_old = TACT_ID
             continue
 
+        if i < (len(flights)):
+            if (i+1) == len(flights):
+                end = True
+            elif flights[i+1][1] != TACT_ID:
+                end = True
+
         with open(SO6_filename, 'a') as SO6_file:
             writer = csv.writer(SO6_file)
-            line_SO6 = build_SO6_line(flights[i], flights[i - 1], flight_index)
+            line_SO6 = build_SO6_line(flights[i], flights[i - 1], flight_index, end)
             writer.writerow(line_SO6)
             flight_index = flight_index + 1
 
@@ -140,11 +154,34 @@ def write_SO6_flights(flights):
     print 'SO6 file created'
     return
 
+def read_airports(filename):
+    list_airports = []
+
+    with open(filename, 'rb') as airports_file:
+        reader = csv.reader(airports_file, delimiter=',', lineterminator='\n')
+        try:
+            for row in reader:
+                list_airports.append(row)
+        except csv.Error as e:
+            sys.exit('file %s, line %d: %s' % (filename, reader.line_num, e))
+
+        airports_file.close()
+    print 'Airports stored to list'
+    return list_airports
+
 
 # Main
 CPR_filename = 'CPR_D.csv'
 CPR_filename = 'test.txt'
 CPR_flights = read_flights(CPR_filename)
+
+airports_filename = 'airports.csv'
+airports = read_airports(airports_filename)
+
+
+
+
+
 SO6_filename = 'SO6_flights.csv'
 
 try:
