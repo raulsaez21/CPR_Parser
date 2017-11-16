@@ -135,6 +135,7 @@ list_flights_D_after = parse_file(in_filename, out_filename, list_flights_D_afte
 
 
 #Filtering D-1 and D+1 flights and creating the corresponding flights; first the indexes and then the flights
+# The indexes are found by comparing the TACT_ID with the flights of day D
 filename = 'previous_D_indexes.csv'
 filtered_indexes_previous_D = []
 try:

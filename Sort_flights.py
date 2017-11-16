@@ -47,6 +47,7 @@ def write_sorted_flight(output_filename, flights):
     print 'Sorted flights files created'
     return
 
+
 # Main
 CPR_filename = 'previous_D_flights.csv'
 D_before_flights = read_flights_comma(CPR_filename)
